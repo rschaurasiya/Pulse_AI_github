@@ -30,15 +30,25 @@ class FirebaseManager:
                 # 2. Try loading from Streamlit Secrets (Cloud)
                 # Check for [firebase] section first
                 elif "firebase" in st.secrets:
-                    cred = credentials.Certificate(dict(st.secrets["firebase"]))
+                    secret_dict = dict(st.secrets["firebase"])
+                    # Fix: Handle private_key newlines if they are escaped
+                    if "private_key" in secret_dict:
+                        secret_dict["private_key"] = secret_dict["private_key"].replace("\\n", "\n")
+                    cred = credentials.Certificate(secret_dict)
                 
                 # Check for [service_account] section
                 elif "service_account" in st.secrets:
-                   cred = credentials.Certificate(dict(st.secrets["service_account"]))
+                   secret_dict = dict(st.secrets["service_account"])
+                   if "private_key" in secret_dict:
+                       secret_dict["private_key"] = secret_dict["private_key"].replace("\\n", "\n")
+                   cred = credentials.Certificate(secret_dict)
 
                 # Check if keys are at the root level of secrets
                 elif "project_id" in st.secrets and "private_key" in st.secrets:
-                    cred = credentials.Certificate(dict(st.secrets))
+                    secret_dict = dict(st.secrets)
+                    if "private_key" in secret_dict:
+                       secret_dict["private_key"] = secret_dict["private_key"].replace("\\n", "\n")
+                    cred = credentials.Certificate(secret_dict)
                 
                 else:
                     st.error("Firebase Credentials Not Found! Please ensure 'serviceAccountKey.json' exists locally OR add your service account details to Streamlit Secrets (under [firebase] or at root).")
@@ -168,7 +178,10 @@ class FirebaseManager:
 
     def save_summary(self, article_data, summary, category, user_id):
         """Saves generated summary to User's Firestore."""
-        if not self._db or not user_id: return False
+        if not self._db:
+            st.error("Database connection not initialized. Cannot save summary.")
+            return False
+        if not user_id: return False
         
         try:
             doc_id = self._get_hash(article_data['link'])
@@ -186,12 +199,15 @@ class FirebaseManager:
             self._db.collection('users').document(user_id).collection('summaries').document(doc_id).set(data)
             return True
         except Exception as e:
-            print(f"Error saving summary: {e}")
+            st.error(f"Error saving summary to database: {e}")
             return False
 
     def save_bookmark(self, article_data, user_id):
         """Save article to User's bookmarks."""
-        if not self._db or not user_id: return False
+        if not self._db:
+            st.error("Database connection not initialized. Cannot save bookmark.")
+            return False
+        if not user_id: return False
         
         try:
             doc_id = self._get_hash(article_data['link'])
@@ -208,12 +224,15 @@ class FirebaseManager:
             self._db.collection('users').document(user_id).collection('bookmarks').document(doc_id).set(data)
             return True
         except Exception as e:
-            print(f"Error bookmarking: {e}")
+            st.error(f"Error bookmarking: {e}")
             return False
 
     def remove_bookmark(self, article_url, user_id):
         """Remove article from User's bookmarks."""
-        if not self._db or not user_id: return False
+        if not self._db:
+             st.error("Database connection not initialized.")
+             return False
+        if not user_id: return False
         
         try:
             doc_id = self._get_hash(article_url)
@@ -221,7 +240,7 @@ class FirebaseManager:
             self._db.collection('users').document(user_id).collection('bookmarks').document(doc_id).delete()
             return True
         except Exception as e:
-            print(f"Error removing bookmark: {e}")
+            st.error(f"Error removing bookmark: {e}")
             return False
             
     def get_bookmarks(self, user_id):

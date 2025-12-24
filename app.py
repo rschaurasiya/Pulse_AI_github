@@ -448,13 +448,16 @@ def main():
                             else:
                                 t = f"{item.get('title')}. {item.get('summary', '')}"
                                 s_save = summarize_text(t)
-                                fb_manager.save_summary(item, s_save, category, user_id)
+                                success_summary = fb_manager.save_summary(item, s_save, category, user_id)
+                                success_bookmark = fb_manager.save_bookmark(item, user_id)
                             
-                            item['summary'] = s_save
-                            fb_manager.save_bookmark(item, user_id)
-                            st.session_state[f"show_summary_{item_key}"] = True
-                            st.toast("Article Saved!")
-                            st.rerun()
+                            if success_summary and success_bookmark:
+                                item['summary'] = s_save
+                                st.session_state[f"show_summary_{item_key}"] = True
+                                st.toast("Article Saved!")
+                                st.rerun()
+                            else:
+                                st.error("Failed to save article. Check your connection or Firebase configuration.")
             else:
                  with col_actions:
                      st.caption("✅ Saved")
