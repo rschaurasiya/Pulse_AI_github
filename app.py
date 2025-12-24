@@ -442,6 +442,10 @@ def main():
                  with col_actions:
                     if st.button("Save", key=f"save_{item_key}"):
                          with st.spinner("Saving..."):
+                            # Initialize variables to prevent UnboundLocalError
+                            success_summary = False
+                            success_bookmark = False
+                            
                             existing = fb_manager.get_summary(item['link'], user_id)
                             if existing:
                                 s_save = existing
