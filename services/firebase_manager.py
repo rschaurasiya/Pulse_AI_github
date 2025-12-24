@@ -21,7 +21,7 @@ class FirebaseManager:
         """Initializes Firebase app if not already initialized."""
         if not firebase_admin._apps:
             try:
-                cred = credentials.Certificate('serviceAccountKey.json')
+                cred = credentials.Certificate(st.secrets["firebase_service_account"])
                 firebase_admin.initialize_app(cred)
                 self._db = firestore.client()
                 # print("Firebase initialized successfully.")
