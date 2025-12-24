@@ -3,6 +3,7 @@ from firebase_admin import credentials, firestore
 import hashlib
 from datetime import datetime
 import streamlit as st
+import os
 
 import requests
 from config.settings import FIREBASE_WEB_API_KEY
@@ -21,12 +22,36 @@ class FirebaseManager:
         """Initializes Firebase app if not already initialized."""
         if not firebase_admin._apps:
             try:
-                cred = credentials.Certificate(st.secrets["firebase_service_account"])
+                cred = None
+                # 1. Try loading from local file
+                if os.path.exists('serviceAccountKey.json'):
+                    cred = credentials.Certificate('serviceAccountKey.json')
+                
+                # 2. Try loading from Streamlit Secrets (Cloud)
+                # Check for [firebase] section first
+                elif "firebase" in st.secrets:
+                    cred = credentials.Certificate(dict(st.secrets["firebase"]))
+                
+                # Check for [service_account] section
+                elif "service_account" in st.secrets:
+                   cred = credentials.Certificate(dict(st.secrets["service_account"]))
+
+                # Check if keys are at the root level of secrets
+                elif "project_id" in st.secrets and "private_key" in st.secrets:
+                    cred = credentials.Certificate(dict(st.secrets))
+                
+                else:
+                    st.error("Firebase Credentials Not Found! Please ensure 'serviceAccountKey.json' exists locally OR add your service account details to Streamlit Secrets (under [firebase] or at root).")
+                    self._db = None
+                    return
+
+                # Initialize with selected credentials
                 firebase_admin.initialize_app(cred)
                 self._db = firestore.client()
                 # print("Firebase initialized successfully.")
+                
             except Exception as e:
-                print(f"Error initializing Firebase: {e}")
+                st.error(f"Error initializing Firebase: {e}")
                 self._db = None
         else:
             self._db = firestore.client()
