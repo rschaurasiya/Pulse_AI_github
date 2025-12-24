@@ -448,8 +448,10 @@ def main():
                             else:
                                 t = f"{item.get('title')}. {item.get('summary', '')}"
                                 s_save = summarize_text(t)
-                                success_summary = fb_manager.save_summary(item, s_save, category, user_id)
-                                success_bookmark = fb_manager.save_bookmark(item, user_id)
+                            
+                            # Always save both summary and bookmark
+                            success_summary = fb_manager.save_summary(item, s_save, category, user_id)
+                            success_bookmark = fb_manager.save_bookmark(item, user_id)
                             
                             if success_summary and success_bookmark:
                                 item['summary'] = s_save
