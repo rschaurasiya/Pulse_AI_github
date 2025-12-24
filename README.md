@@ -48,7 +48,8 @@
    ```
 
 4. **Set up Firebase**:
-   - Place your `firebase-credentials.json` file in the root directory
+   - Download your Firebase service account key from Firebase Console → Project Settings → Service Accounts → Generate New Private Key
+   - Save it as `serviceAccountKey.json` in the root directory
    - Enable Firestore Database in your Firebase Console
    - Enable Email/Password Authentication
 
@@ -66,31 +67,38 @@ The app will be available at `http://localhost:8501`
 Ensure your repository contains:
 - `app.py` (main entry point)
 - `requirements.txt` (all dependencies listed)
-- `.streamlit/secrets.toml` (for environment variables)
+- **DO NOT** commit `serviceAccountKey.json` or `.env` to your repository
 
 ### Step 2: Configure Secrets
-In your Streamlit Cloud dashboard, add these secrets:
+
+> **IMPORTANT**: The "Save" button will not work without proper Firebase credentials in secrets!
+
+In your Streamlit Cloud dashboard (App Settings → Secrets), add:
 
 ```toml
-# .streamlit/secrets.toml (for local testing)
+# API Keys
 GROQ_API_KEY = "your_groq_api_key"
 FIREBASE_WEB_API_KEY = "your_firebase_web_api_key"
-NEWS_API_KEY = "your_newsapi_key"
-GNEWS_API_KEY = "your_gnews_key"
+NEWS_API_ORG = "your_newsapi_key"  # Optional
+GNEWS_IO = "your_gnews_key"        # Optional
 
-# Firebase credentials (paste entire JSON)
-[firebase_credentials]
+# Firebase Service Account (REQUIRED for Save functionality)
+# Copy all fields from your serviceAccountKey.json file
+[firebase]
 type = "service_account"
 project_id = "your-project-id"
-private_key_id = "..."
-private_key = "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
-client_email = "..."
-client_id = "..."
+private_key_id = "your-private-key-id"
+private_key = "-----BEGIN PRIVATE KEY-----\nyour-private-key-here\n-----END PRIVATE KEY-----\n"
+client_email = "your-service-account@your-project.iam.gserviceaccount.com"
+client_id = "your-client-id"
 auth_uri = "https://accounts.google.com/o/oauth2/auth"
 token_uri = "https://oauth2.googleapis.com/token"
 auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
-client_x509_cert_url = "..."
+client_x509_cert_url = "https://www.googleapis.com/robot/v1/metadata/x509/your-service-account%40your-project.iam.gserviceaccount.com"
+universe_domain = "googleapis.com"
 ```
+
+**Note**: The `private_key` field should contain the full key with `\n` for newlines. Streamlit will handle this automatically.
 
 ### Step 3: Deploy
 1. Go to [share.streamlit.io](https://share.streamlit.io)
@@ -115,7 +123,7 @@ Pulse_AI/
 │   └── helpers.py             # UI utilities and CSS theming
 ├── requirements.txt           # Python dependencies
 ├── .env                       # Environment variables (not in repo)
-└── firebase-credentials.json  # Firebase service account (not in repo)
+└── serviceAccountKey.json     # Firebase service account (not in repo)
 ```
 
 ## Environment Variables Reference
@@ -162,21 +170,30 @@ Pulse_AI/
 
 ### Common Issues
 
-1. **Missing Module Errors**:
+1. **"Save" Button Not Working**:
+   - Verify `[firebase]` section exists in Streamlit Secrets
+   - Ensure all fields from `serviceAccountKey.json` are copied correctly
+   - Check that `private_key` includes the full key with `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----`
+   - Look for error messages in the app (now displayed in red boxes)
+
+2. **"Database connection not initialized" Error**:
+   - Firebase credentials are missing or incorrect in secrets
+   - Verify the secrets format matches the example above
+   - Ensure you're using `[firebase]` not `[firebase_credentials]`
+
+3. **Missing Module Errors**:
    - Ensure all packages are in `requirements.txt`
    - Check for typos in package names
 
-2. **Firebase Credentials Not Found**:
-   - Add `firebase_credentials` to Streamlit secrets
-   - Ensure JSON structure is valid
-
-3. **API Key Errors**:
-   - Verify all keys are added to secrets
+4. **API Key Errors**:
+   - Verify all required keys (`GROQ_API_KEY`, `FIREBASE_WEB_API_KEY`) are in secrets
    - Check for trailing whitespace in keys
+   - Ensure key names match exactly (case-sensitive)
 
-4. **App Not Loading**:
+5. **App Not Loading**:
    - Check Streamlit Cloud logs for errors
    - Ensure `app.py` is set as the main file
+   - Wait for the app to fully restart after updating secrets
 
 ## License
 
