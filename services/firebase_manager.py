@@ -39,7 +39,7 @@ class FirebaseManager:
     def login_user(self, email, password):
         """Logs in a user using Firebase Auth REST API."""
         if not FIREBASE_WEB_API_KEY:
-            st.error("Missing FIREBASE_WEB_API_KEY. Please add it to your .env file.")
+            st.error("Missing FIREBASE_WEB_API_KEY. Add it to .env (local) or Streamlit Secrets (cloud).")
             return None
             
         url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_WEB_API_KEY}"
@@ -63,7 +63,7 @@ class FirebaseManager:
     def signup_user(self, email, password):
         """Signs up a new user using Firebase Auth REST API."""
         if not FIREBASE_WEB_API_KEY:
-            st.error("Missing FIREBASE_WEB_API_KEY. Please add it to your .env file.")
+            st.error("Missing FIREBASE_WEB_API_KEY. Add it to .env (local) or Streamlit Secrets (cloud).")
             return None
 
         url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_WEB_API_KEY}"

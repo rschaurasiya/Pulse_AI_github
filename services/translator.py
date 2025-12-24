@@ -6,7 +6,9 @@ def translate_to_hindi(text):
     Translates English text to Hindi using Groq API.
     """
     if not GROQ_API_KEY:
-        return text  # Return original text if no API key
+        # Graceful fallback: return original text if no API key configured
+        # Key should be in .env (local) or Streamlit Secrets (cloud)
+        return text
     
     try:
         client = Groq(api_key=GROQ_API_KEY)

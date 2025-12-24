@@ -1,15 +1,7 @@
-import os
 import requests
 import feedparser
 from datetime import datetime
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-# Get API keys from environment
-NEWS_API_KEY = os.getenv('NEWS_API_ORG')
-GNEWS_API_KEY = os.getenv('GNEWS_IO')
+from config.settings import NEWS_API_KEY, GNEWS_API_KEY
 
 # RSS Feeds by category
 RSS_FEEDS = {
@@ -76,7 +68,7 @@ def fetch_from_newsapi(category="Technology", max_results=5):
     Returns a list of news items
     """
     if not NEWS_API_KEY:
-        print("NewsAPI key not found in .env file")
+        print("NewsAPI key not found. Add 'NEWS_API_ORG' to .env (local) or Streamlit Secrets (cloud)")
         return []
     
     try:
@@ -118,7 +110,7 @@ def fetch_from_gnews(category="Technology", max_results=5):
     Returns a list of news items
     """
     if not GNEWS_API_KEY:
-        print("GNews API key not found in .env file")
+        print("GNews API key not found. Add 'GNEWS_IO' to .env (local) or Streamlit Secrets (cloud)")
         return []
     
     try:

@@ -47,7 +47,7 @@ def summarize_text(text):
     Summarizes the given text using Groq API.
     """
     if not GROQ_API_KEY:
-        return "Error: No GROQ_API_KEY found in environment variables."
+        return "Error: Missing GROQ_API_KEY. Add it to .env (local) or Streamlit Secrets (cloud)."
 
     try:
         # Initialize the Groq client
